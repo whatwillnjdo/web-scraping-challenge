@@ -1,5 +1,8 @@
 from splinter import Browser
 from bs4 import BeautifulSoup
+import requests
+import pandas as pd
+import time
 
 
 def init_browser():
@@ -56,8 +59,10 @@ def scrape():
     
     facts_data = facts_df.to_html()
     
-    all_content["facts"] = facts_data
+    all_content["facts"] = facts_df
     
+    hemisphere_title_clean = []
+    url_component = []
     hemisphere_url = 'https://astrogeology.usgs.gov/search/results?q=hemisphere+enhanced&k1=target&v1=Mars'
     browser.visit(hemisphere_url)
     hemisphere_html = browser.html
@@ -71,14 +76,12 @@ def scrape():
     url_component = list( dict.fromkeys(url_component))
     
     hemisphere = hemisphere_url.split('/')[2]
-    hemisphere_image_urls = []
-    image_url = {}
-    for title in hemisphere_title_clean:
-        for url in url_component:
-            hemisphere_url = 'https://astropedia.'+hemisphere+'/download/'+url.split('/')[3]+'/'+url.split('/')[4]+'/'+url.split('/')[5]+'.tif/full.jpg'
-            image_url["title"] = title
-            image_url["img_url"] = hemisphere_url
-        hemisphere_image_urls.append(image_url)  
+    image_urls = []
+    for url in url_component:
+        hemisphere_url ='https://astropedia.'+hemisphere+'/download/'+url.split('/')[3]+'/'+url.split('/')[4]+'/'+url.split('/')[5]+'.tif/full.jpg'
+        image_urls.append(hemisphere_url)  
+            
+    hemisphere_image_urls = dict(zip(hemisphere_title_clean,image_urls))        
     
     all_content['hemisphere_image_urls'] = hemisphere_image_urls
     
