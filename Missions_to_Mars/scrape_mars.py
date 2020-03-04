@@ -12,29 +12,38 @@ def init_browser():
 def scrape():
     browser = init_browser()
     all_content = {}
-
+    
+    #Scrape the latest news
     news_url = "https://mars.nasa.gov/news"
     
+    #Beauftiful soup config
     browser.visit(news_url)
     html = browser.html
     soup = BeautifulSoup(html, "html.parser")
-
+    
+    #Add the news title and synopsys to all_content dictionary
     all_content["news_title"] = soup.find('div', class_="content_title").text
     all_content["news_synopsis"] = soup.find('div', class_='rollover_description_inner').text
     
-    
+    #Scrape the featured image
     pic_url = 'https://www.jpl.nasa.gov/spaceimages/?search=&category=Mars'
+    
+    #Beauftiful soup config
     browser.visit(pic_url)
     html = browser.html
     pic_soup = BeautifulSoup(html, 'html.parser')
 
+    #Get the component we need from the scrape
     picture = pic_soup.find('article').find('a').get('data-fancybox-href')
     
     modified_url = pic_url.split('?')[0]
     modified_picture = picture.split('/')[2]+"/"+picture.split('/')[3]+"/"+picture.split('/')[4]
     new_url = modified_url + modified_picture
+    
+    #Add the featured image to all_content dictionary
     all_content["featured_image"] = new_url
     
+    #Scrape the weather on mars
     twitter_url = 'https://twitter.com/marswxreport?lang=en'
     response = requests.get(twitter_url)
     time.sleep(1)
@@ -58,8 +67,9 @@ def scrape():
     facts_df.set_index('Description', inplace=True)
     
     facts_data = facts_df.to_html()
+    facts_data = facts_data.replace('\n', '')
     
-    all_content["facts"] = facts_df
+    all_content["facts"] = facts_data
     
     hemisphere_url = 'https://astrogeology.usgs.gov/search/results?q=hemisphere+enhanced&k1=target&v1=Mars'
     browser.visit(hemisphere_url)
@@ -73,10 +83,8 @@ def scrape():
 
     # Loop through the items previously stored
     for i in items: 
-        # Store title
-        title = i.find('h3').text
         
-        # Store link that leads to full image website
+        title = i.find('h3').text
         partial_img_url = i.find('a', class_='itemLink product-item')['href']
         
         # Visit the link that contains the full image website 
@@ -92,7 +100,6 @@ def scrape():
         img_url = hemispheres_main_url + soup.find('img', class_='wide-image')['src']
             
         # Append the retreived information into a list of dictionaries 
-        #dictionary={"title":title,"img_url":img_url}
         hemisphere_image_urls.append({"title":title,"img_url":img_url})
     
     all_content['hemisphere_image_urls'] = hemisphere_image_urls
