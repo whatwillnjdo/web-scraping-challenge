@@ -1,5 +1,4 @@
-# web-scraping-challenge
-Web Scraping Homework - Mission to Mars
+# Mission to Mars
 
 A full-stack web scraping project to retrieve Mars-related data from various websites, 
 store data in a MongoDB database and populate a web page. 
